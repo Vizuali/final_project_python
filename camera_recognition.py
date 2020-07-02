@@ -5,16 +5,20 @@ import string
 import numpy as np
 
 # Generate some random string to assign as id
-# def _generate_id(stringLength=8):
-#     letters = string.ascii_lowercase
-#     return ''.join(random.choice(letters) for i in range(stringLength))
+def _generate_id(stringLength=8):
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(stringLength))
 
-# def check_face(face_encode):
-#     if face_recognition.compare_faces(face_encode, face_record.).contains(True):
-#         return [], 
-#     else:
-#         new_id = _generate_id()
-#         return (new_id, face_encode), (new_id, 1)
+def check_face(face_encode):
+    listed = False
+    for key in face_record:
+        encode = face_record[key]
+        distance = face_recognition.face_distance([face_encode], encode)[0]
+        if distance <= 0.7:
+            listed = True
+    
+    if listed == False:
+        face_record[_generate_id()] = face_encode
 
 # Get a reference to webcam #0 (the default one)
 video_capture = cv2.VideoCapture(0)
@@ -42,7 +46,7 @@ while keep_working:
     # Only process every other frame of video to save time
     if process_this_frame:
         # Find all the faces and face encodings in the current frame of video
-        face_locations = face_recognition.face_locations(rgb_small_frame)
+        face_locations = face_recognition.face_locations(rgb_small_frame, model="cnn")
         face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
 
     process_this_frame = not process_this_frame
@@ -51,7 +55,7 @@ while keep_working:
     # Display the results
     for (top, right, bottom, left), face_encode in zip(face_locations, face_encodings):
 
-        
+        check_face(face_encode)
 
         # Scale back up face locations since the frame we detected in was scaled to 1/4 size
         top *= 4
@@ -63,13 +67,13 @@ while keep_working:
         cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
         
         face = frame[top:bottom, left:right]
-
         blurred = cv2.blur(face, (50, 50))
-
         frame[top:bottom, left:right] = blurred
 
         # Draw a label with a name below the face
         cv2.rectangle(frame, (left, bottom), (right, bottom), (0, 0, 255), cv2.FILLED)
+        font = cv2.FONT_HERSHEY_DUPLEX
+        cv2.putText(frame, "People: " + str(len(face_record)), (0, 20), font, 1.0, (255, 255, 255), 1)
 
     # Display the resulting image
     cv2.imshow('Video', frame)
