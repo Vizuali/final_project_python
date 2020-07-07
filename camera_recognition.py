@@ -4,6 +4,7 @@ import random
 import string
 import numpy as np
 import time
+import os
 
 # Constants
 WARNING_TIME_LAPSE = 60
@@ -35,6 +36,8 @@ def check_face(face_encode, face_record):
     listed = False
     warning = False 
 
+    face_id = None
+
     # Iterate over array of faces seen before
     for i in range(len(face_record)):
         
@@ -48,6 +51,8 @@ def check_face(face_encode, face_record):
             listed = True
             last_seen = face_record[i]['last_time_seen']
             first_seen = face_record[i]['first_time_seen']
+
+            face_id = face_record[i]['id']
             
             if face_record[i]['alerts'] > WARNING_VIEWS:
                 warning = True
@@ -81,19 +86,30 @@ def check_face(face_encode, face_record):
             'encode': face_encode,
             'first_time_seen': current,
             'last_time_seen': current,
-            'alerts': 0
+            'alerts': 0,
+            'photo_taken': False
         }
+        face_id = face['id']
         face_record = [face] + face_record
 
-    return face_record, warning
+    return face_id, face_record, warning
     
+
+def save_suspect_face(face_img, face_id):
+    os.makedirs("suspect/" + face_id, exist_ok=bool)
+
+    ls = os.listdir("./suspect/" + face_id)
+    if len(ls) < 100: 
+        cv2.imwrite("./suspect/" + face_id + "/" + str(len(ls)) + ".jpg", face_img)
+
 
 # Get a reference to webcam #0 (the default one)
 video_capture = cv2.VideoCapture(0)
 
 # Initialize some variables
 
-face_record = [] # Contains dictionaries a.k.a. face = {'id': None, 'encode': None, 'time': None}
+face_record = [] # Contains dictionaries a.k.a. face = {'id': String, 'encode': Array, 'first_time_taken': float, 
+                 #                                      'last_time_seen': float, 'alerts': int, 'photo_taken': bool}
 
 process_this_frame = True
 keep_working = True
@@ -123,7 +139,7 @@ while keep_working:
     # Display the results
     for (top, right, bottom, left), face_encode in zip(face_locations, face_encodings):
 
-        face_record, warning = check_face(face_encode, face_record)
+        face_id, face_record, warning = check_face(face_encode, face_record)
 
         # Scale back up face locations since the frame we detected in was scaled to 1/4 size
         top *= 4
@@ -134,13 +150,17 @@ while keep_working:
         # Draw a box around the face
         if warning:
             cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+            
+            face = frame[top:bottom, left:right]
+            save_suspect_face(face, face_id)
+            
         else:
             cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
         
-        face = frame[top:bottom, left:right]
-        blurred = cv2.blur(face, (50, 50))
-        frame[top:bottom, left:right] = blurred
-        
+            face = frame[top:bottom, left:right]
+            blurred = cv2.blur(face, (50, 50))
+            frame[top:bottom, left:right] = blurred
+            
 
     # Display the resulting image
     font = cv2.FONT_HERSHEY_DUPLEX

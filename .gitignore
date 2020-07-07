@@ -1,3 +1,11 @@
+# Environment de python
 env
+
+# Directorio de la libreria dlib
 dlib
+
+# Directorio para archivos de prueba
 data
+
+# Directorio de fotos sospechosas
+suspect 
