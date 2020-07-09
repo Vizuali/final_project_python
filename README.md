@@ -45,9 +45,17 @@ Just execute the camera_recognition file:
 
 ### Face recognition and blur:
 The coordinates of the face recognized are in the down left corner. The program recongnizes the face and make a blur on it.
-![](https://s7.gifyu.com/images/2020-07-08-16-54-02.gif)
-![](https://s7.gifyu.com/images/2020-07-08-16-56-59.gif)
-![](https://s7.gifyu.com/images/2020-07-08-16-47-15.gif)
+
+![Face recognition](https://i.imgur.com/3PIKelI.png)
+
+Videos
+
+https://s7.gifyu.com/images/2020-07-08-16-54-02.gif
+
+https://s7.gifyu.com/images/2020-07-08-16-56-59.gif
+
+https://s7.gifyu.com/images/2020-07-08-16-47-15.gif
+
 ### Detected faces.
 ![Detected faces](https://i.imgur.com/9Hs7Iu0.jpg)
 
